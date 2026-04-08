@@ -1,0 +1,51 @@
+services:
+
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: customer_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  mock-server:
+    build:
+      context: ./mock-service
+    container_name: mock-server
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+
+  pipeline-service:
+    build:
+      context: ./pipeline-service
+    container_name: pipeline-service
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - mock-server
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/customer_db
+      DB_USERNAME: postgres
+      DB_PASSWORD: password
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+volumes:
+  pgdata:
