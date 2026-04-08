@@ -1,6 +1,7 @@
 package com.customer.mock_service.service;
 
 import com.customer.mock_service.entity.Customer;
+import com.customer.mock_service.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.springframework.core.io.ClassPathResource;
@@ -62,6 +63,10 @@ public class CustomerServiceImpl implements CustomerService{
         return customers.stream()
                 .filter(c -> c.getCustomerId().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Not Found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Customer not found with id: " + id
+                        )
+                );
     }
 }
