@@ -4,6 +4,7 @@ import com.customer.pipeline_service.entity.Customer;
 import com.customer.pipeline_service.repository.CustomerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -18,8 +19,8 @@ public class IngestionServiceImpl implements IngestionService {
     private final CustomerRepository repository;
     private final ObjectMapper objectMapper;
 
-    private static final String URL =
-            "http://mock-server:5000/api/customers?page=%d&limit=5";
+    @Value("${customer.api.url}")
+    private String customerApiUrl;
 
     @Transactional
     @Override
@@ -29,7 +30,7 @@ public class IngestionServiceImpl implements IngestionService {
         int processed = 0;
 
         while (true) {
-            String api = String.format(URL, page);
+            String api = String.format(customerApiUrl, page);
             Map<String, Object> response =
                     restTemplate.getForObject(api, Map.class);
 
