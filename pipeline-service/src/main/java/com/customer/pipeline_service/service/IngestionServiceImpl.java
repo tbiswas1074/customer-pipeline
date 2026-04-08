@@ -30,7 +30,9 @@ public class IngestionServiceImpl implements IngestionService {
         int processed = 0;
 
         while (true) {
+
             String api = String.format(customerApiUrl, page);
+
             Map<String, Object> response =
                     restTemplate.getForObject(api, Map.class);
 
@@ -39,18 +41,19 @@ public class IngestionServiceImpl implements IngestionService {
 
             List<Map<String, Object>> data =
                     (List<Map<String, Object>>) response.get("data");
+
             if (data == null || data.isEmpty())
                 break;
-            for (Map<String, Object> c : data) {
 
-                Customer customer =
-                        objectMapper.convertValue(c, Customer.class);
+            List<Customer> customers = data.stream()
+                    .map(c -> objectMapper.convertValue(c, Customer.class))
+                    .toList();
+            repository.saveAll(customers);
 
-                repository.save(customer);
-                processed++;
-            }
+            processed += customers.size();
             page++;
         }
+
         return processed;
     }
 }
