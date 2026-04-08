@@ -38,7 +38,6 @@ public class CustomerServiceImpl implements CustomerService{
 
         int start = page * limit;
 
-        // prevent index error
         if (start >= total) {
             return Map.of(
                     "data", List.of(),
